@@ -2,37 +2,39 @@ package psi
 
 import (
 	"crypto/rand"
-	"io"
 	"math/big"
 )
 
-type KeyPair struct {
-	Prime *big.Int
-	Enc   *big.Int
-	Dec   *big.Int
+type Key struct {
+	prime     *big.Int
+	secret    *big.Int
+	secretInv *big.Int
 }
 
 var bigOne = big.NewInt(1)
 
-func GenerateKeyPair(rnd io.Reader, prime *big.Int, numBits int) (kp *KeyPair, err error) {
-	kp = &KeyPair{Prime: prime}
+func GenerateKey(prime *big.Int, size int) (key *Key, err error) {
+	// Store common seed (large prime).
+	key = &Key{prime: prime}
+
 	phiP := new(big.Int).Sub(prime, bigOne)
 	for {
-		if kp.Enc, err = rand.Prime(rnd, numBits); err != nil {
+		if key.secret, err = rand.Prime(rand.Reader, size); err != nil {
 			return
 		}
-		if new(big.Int).GCD(nil, nil, kp.Enc, phiP).Cmp(bigOne) == 0 {
+		if new(big.Int).GCD(nil, nil, key.secret, phiP).Cmp(bigOne) == 0 {
 			break
 		}
 	}
-	kp.Dec = new(big.Int).ModInverse(kp.Enc, phiP)
+
+	key.secretInv = new(big.Int).ModInverse(key.secret, phiP)
 	return
 }
 
-func (k *KeyPair) EncryptInt(v *big.Int) *big.Int {
-	return new(big.Int).Exp(v, k.Enc, k.Prime)
+func (key *Key) Encrypt(v *big.Int) *big.Int {
+	return new(big.Int).Exp(v, key.secret, key.prime)
 }
 
-func (k *KeyPair) DecryptInt(v *big.Int) *big.Int {
-	return new(big.Int).Exp(v, k.Dec, k.Prime)
+func (key *Key) Decrypt(v *big.Int) *big.Int {
+	return new(big.Int).Exp(v, key.secretInv, key.prime)
 }
