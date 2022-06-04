@@ -1,10 +1,8 @@
-package psi_test
+package psi
 
 import (
 	"crypto/rand"
 	"fmt"
-
-	"github.com/lucasmenendez/psi"
 )
 
 func Example() {
@@ -14,24 +12,24 @@ func Example() {
 	prime, _ := rand.Prime(rand.Reader, 256)
 
 	// Create Alice key pair
-	var alice *psi.Key
-	if alice, err = psi.GenerateKey(prime, 32); err != nil {
+	var alice *Key
+	if alice, err = GenerateKey(prime, 32); err != nil {
 		fmt.Println(err)
 	}
 
 	// Create Bob key pair
-	var bob *psi.Key
-	if bob, err = psi.GenerateKey(prime, 32); err != nil {
+	var bob *Key
+	if bob, err = GenerateKey(prime, 32); err != nil {
 		fmt.Println(err)
 	}
 
 	// Create and encode Alice secret
 	aliceMsg := "testemailAddress43@gmail.com"
-	encodedAliceMsg := psi.Encode(aliceMsg)
+	encodedAliceMsg := Encode(aliceMsg)
 
 	// Create and encode Bob secret
 	bobMsg := "testemailAddress43@gmail.com"
-	encodedBobMsg := psi.Encode(bobMsg)
+	encodedBobMsg := Encode(bobMsg)
 
 	// Encrypt Alice original message by Alice first, and then by Bob
 	encryptedAlice := alice.Encrypt(encodedAliceMsg)
