@@ -3,14 +3,16 @@ package psi
 import "testing"
 
 func TestFilter(t *testing.T) {
-	items := []string{ "aaa", "bbb", "ccc" }
-
-	filter := NewFilter(len(items), 0.001)
-	for _, item := range items {
-		filter.Add([]byte(item))
+	items := [][]byte{
+		[]byte("aaa"),
+		[]byte("bbb"),
+		[]byte("ccc"),
 	}
 
-	input := []byte(items[0])
+	filter := NewFilter(len(items), 0.001)
+	filter.Add(items...)
+
+	input := items[0]
 	if !filter.Test(input) {
 		t.Errorf("Expected that filter contains '%s'.", input)
 	}

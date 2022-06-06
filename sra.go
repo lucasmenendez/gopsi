@@ -38,15 +38,14 @@ func GenerateKey(prime *big.Int, size int) (key *Key, err error) {
 }
 
 func (key *Key) Encrypt(v *big.Int) *big.Int {
-	// Generates E_K(M) = M^K mod n, where M is the plain message, K is the 
+	// Generates E_K(M) = M^K mod n, where M is the plain message, K is the
 	// key.secret and n is the common prime provided during the key generation.
 	return new(big.Int).Exp(v, key.secret, key.prime)
 }
 
-
 func (key *Key) Decrypt(v *big.Int) *big.Int {
-	// Generates D_K(C) = C^L mod n, where C is the cipher message, L is the 
-	// key.secretInv and n is the common prime provided during the key 
+	// Generates D_K(C) = C^L mod n, where C is the cipher message, L is the
+	// key.secretInv and n is the common prime provided during the key
 	// generation.
 	return new(big.Int).Exp(v, key.secretInv, key.prime)
 }

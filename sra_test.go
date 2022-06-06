@@ -9,7 +9,7 @@ import (
 func TestGenerateKey(t *testing.T) {
 	prime, _ := rand.Prime(rand.Reader, 256)
 	phiP := new(big.Int).Sub(prime, bigOne)
-	
+
 	var key1, key2 *Key
 	var err error
 	key1, err = GenerateKey(prime, 32)

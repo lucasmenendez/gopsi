@@ -35,7 +35,7 @@ func Decode(encoded *big.Int) (decoded string, err error) {
 	var bytes []byte
 	for i := 0; i < len(str); i += positions {
 		// Get the current string position content.
-		var value string = str[i : i + positions]
+		var value string = str[i : i+positions]
 		// Cast the string value to integer.
 		var number int
 		if number, err = strconv.Atoi(value); err != nil {
