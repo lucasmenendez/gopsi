@@ -12,14 +12,14 @@ func Example() {
 	prime, _ := rand.Prime(rand.Reader, 256)
 
 	// Create Alice key pair
-	var alice *Key
-	if alice, err = GenerateKey(prime, 32); err != nil {
+	var alice *SRAKey
+	if alice, err = NewKey(prime, 32); err != nil {
 		fmt.Println(err)
 	}
 
 	// Create Bob key pair
-	var bob *Key
-	if bob, err = GenerateKey(prime, 32); err != nil {
+	var bob *SRAKey
+	if bob, err = NewKey(prime, 32); err != nil {
 		fmt.Println(err)
 	}
 

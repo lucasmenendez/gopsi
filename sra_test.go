@@ -7,18 +7,19 @@ import (
 )
 
 func TestGenerateKey(t *testing.T) {
+	var bigOne = big.NewInt(1)
 	prime, _ := rand.Prime(rand.Reader, 256)
 	phiP := new(big.Int).Sub(prime, bigOne)
 
-	var key1, key2 *Key
+	var key1, key2 *SRAKey
 	var err error
-	key1, err = GenerateKey(prime, 32)
+	key1, err = NewKey(prime, 32)
 	if err != nil {
 		t.Errorf("Error generating key 1 (prime: %s", prime.String())
 		return
 	}
 
-	key2, err = GenerateKey(prime, 32)
+	key2, err = NewKey(prime, 32)
 	if err != nil {
 		t.Errorf("Error generating key 2 (prime: %s", prime.String())
 		return
