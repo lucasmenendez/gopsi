@@ -3,6 +3,9 @@ package psi
 import (
 	"crypto/rand"
 	"fmt"
+
+	"github.com/lucasmenendez/psi/encoder"
+	"github.com/lucasmenendez/psi/sra"
 )
 
 func Example() {
@@ -12,24 +15,24 @@ func Example() {
 	prime, _ := rand.Prime(rand.Reader, 256)
 
 	// Create Alice key pair
-	var alice *SRAKey
-	if alice, err = NewKey(prime, 32); err != nil {
+	var alice *sra.SRAKey
+	if alice, err = sra.NewKey(prime, 32); err != nil {
 		fmt.Println(err)
 	}
 
 	// Create Bob key pair
-	var bob *SRAKey
-	if bob, err = NewKey(prime, 32); err != nil {
+	var bob *sra.SRAKey
+	if bob, err = sra.NewKey(prime, 32); err != nil {
 		fmt.Println(err)
 	}
 
 	// Create and encode Alice secret
 	aliceMsg := "testemailAddress43@gmail.com"
-	encodedAliceMsg := Encode(aliceMsg)
+	encodedAliceMsg := encoder.Encode(aliceMsg)
 
 	// Create and encode Bob secret
 	bobMsg := "testemailAddress43@gmail.com"
-	encodedBobMsg := Encode(bobMsg)
+	encodedBobMsg := encoder.Encode(bobMsg)
 
 	// Encrypt Alice original message by Alice first, and then by Bob
 	encryptedAlice := alice.Encrypt(encodedAliceMsg)

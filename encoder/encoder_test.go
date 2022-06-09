@@ -1,4 +1,4 @@
-package psi
+package encoder
 
 import (
 	"math/big"

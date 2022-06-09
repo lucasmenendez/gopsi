@@ -1,4 +1,4 @@
-package psi
+package bloomfilter
 
 import "testing"
 
