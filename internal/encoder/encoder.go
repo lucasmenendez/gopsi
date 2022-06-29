@@ -12,7 +12,7 @@ var charSpaces int = 3
 // Encode function process the provided string and return a concatenated bytes
 // numeric values into a single big.Int. It includes a starter mark with value
 // 1 to ensure that every character occupies the same space.
-func Encode(str string) (encoded *big.Int) {
+func StrToInt(str string) (encoded *big.Int) {
 	// Calculate the padding value (p) to multiply the result in each iteration
 	// to get free space to store the next character, taking the reference of
 	// the number of spaces by character: padding = 10^charSpaces
@@ -38,7 +38,7 @@ func Encode(str string) (encoded *big.Int) {
 
 // Decode function process the provided big.Int value, splitting it into slice
 // of bytes value representations and casting it to string.
-func Decode(encoded *big.Int) (decoded string, err error) {
+func IntToStr(encoded *big.Int) (decoded string, err error) {
 	// Delete start mark of received value.
 	var str string = encoded.String()[1:]
 

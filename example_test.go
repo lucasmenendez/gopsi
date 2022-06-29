@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/lucasmenendez/psi/encoder"
-	"github.com/lucasmenendez/psi/sra"
+	"github.com/lucasmenendez/psi/internal/encoder"
+	"github.com/lucasmenendez/psi/pkg/sra"
 )
 
 func Example() {
@@ -28,11 +28,11 @@ func Example() {
 
 	// Create and encode Alice secret
 	aliceMsg := "testemailAddress43@gmail.com"
-	encodedAliceMsg := encoder.Encode(aliceMsg)
+	encodedAliceMsg := encoder.StrToInt(aliceMsg)
 
 	// Create and encode Bob secret
 	bobMsg := "testemailAddress43@gmail.com"
-	encodedBobMsg := encoder.Encode(bobMsg)
+	encodedBobMsg := encoder.StrToInt(bobMsg)
 
 	// Encrypt Alice original message by Alice first, and then by Bob
 	encryptedAlice := alice.Encrypt(encodedAliceMsg)

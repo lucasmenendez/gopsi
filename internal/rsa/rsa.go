@@ -1,6 +1,5 @@
 package rsa
 
-// https://gist.github.com/miguelmota/3ea9286bd1d3c2a985b67cac4ba2130a#file-rsa_util-go
 import (
 	"crypto/rand"
 	"crypto/rsa"
