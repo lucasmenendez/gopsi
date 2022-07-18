@@ -12,6 +12,9 @@ var err error
 var alice *client.Client
 var bob *server.Server
 
+// startIntances initializes the client (alice) and server (bob) instances and
+// perform a secure common prime number exchange using RSA (read more here:
+// https://github.com/lucasmenendez/gopsi/blob/dev/internal/rsa/rsa.go).
 func startIntances() {
 	// start client instance (alice) to generate public key and share it with
 	// the server
@@ -38,6 +41,9 @@ func startIntances() {
 	log.Printf("decrypted common prime by client: %s\n", alice.CommonPrime.String())
 }
 
+// loadSilosData inject mocked data into client and server instances to get
+// encrypted using SRA (read more here:
+// https://github.com/lucasmenendez/gopsi/blob/dev/pkg/sra/sra.go)
 func loadSilosData() {
 	// create client (alice) data and load into the client intance to get it
 	// encrypted
@@ -65,6 +71,13 @@ func loadSilosData() {
 	log.Printf("loaded data by server: %v", bob.Records)
 }
 
+// executeIntersection function performs two actions. First shares the server
+// encrypted data to the client to re-encrypt it into the client. Then share
+// the re-encrypted server data and encrypted client data with the server.
+// Second, creates a BloomFilter (read more here:
+// https://github.com/lucasmenendez/gopsi/blob/dev/pkg/bloomfilter/bloomfilter.go)
+// with the re-encrypted server data and iterates over client encrypted data,
+// re-encrypting it and testing over the created filter.
 func executeIntersection() {
 	// re-encrypt the server encrypted records into the client and share the
 	// result and the encrypted client data with the server
@@ -79,23 +92,7 @@ func executeIntersection() {
 }
 
 func main() {
-	// startIntances initializes the client (alice) and server (bob) instances
-	// and perform a secure common prime number exchange using RSA (read more
-	// here: https://github.com/lucasmenendez/gopsi/blob/dev/internal/rsa/rsa.go).
 	startIntances()
-
-	// loadSilosData inject mocked data into client and server instances to get
-	// encrypted using SRA (read more here:
-	// https://github.com/lucasmenendez/gopsi/blob/dev/pkg/sra/sra.go)
 	loadSilosData()
-
-	// executeIntersection function performs two actions. First shares the
-	// server encrypted data to the client to re-encrypt it into the client.
-	// Then share the re-encrypted server data and encrypted client data with
-	// the server.
-	// Second, creates a BloomFilter (read more here:
-	// https://github.com/lucasmenendez/gopsi/blob/dev/pkg/bloomfilter/bloomfilter.go)
-	// with the re-encrypted server data and iterates over client encrypted
-	// data, re-encrypting it and testing over the created filter.
 	executeIntersection()
 }
