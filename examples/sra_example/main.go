@@ -1,4 +1,4 @@
-package psi
+package main
 
 import (
 	"crypto/rand"
@@ -8,7 +8,7 @@ import (
 	"github.com/lucasmenendez/psi/pkg/sra"
 )
 
-func Example() {
+func main() {
 	var err error
 
 	// Agree a prime seed
