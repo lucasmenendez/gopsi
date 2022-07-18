@@ -2,7 +2,6 @@ package server
 
 import (
 	"crypto/rand"
-	"errors"
 	"math/big"
 
 	"github.com/lucasmenendez/psi/internal/encoder"
@@ -36,10 +35,6 @@ func Init(clientKey []byte) (server *Server, err error) {
 }
 
 func (server *Server) LoadData(data []string) error {
-	if server.sraKey == nil {
-		return errors.New("common prime not defined")
-	}
-
 	server.Records = make([]*big.Int, len(data))
 	for i, item := range data {
 		encoded := encoder.StrToInt(item)
