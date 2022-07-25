@@ -17,24 +17,34 @@ var bob *server.Server
 // https://github.com/lucasmenendez/gopsi/blob/dev/internal/rsa/rsa.go).
 func startIntances() {
 	// start client instance (alice) to generate public key and share it with
-	// the server
+	// the server (bob)
 	alice, err = client.Init()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	// get client (alice) public key byte slice to share it with the server
+	// (bob)
+	var alicePubKey []byte
+	alicePubKey, err = alice.PubKey()
+
 	// start server instance (bob) with the client public key to generate common
 	// prime, encrypt it with the key provided and share the result with the
 	// client
-	bob, err = server.Init(alice.PublicKey)
+	bob, err = server.Init()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	log.Printf("generated common prime by server: %s\n", bob.CommonPrime.String())
 
+	var encPrime []byte
+	if encPrime, err = bob.EncryptedPrime(alicePubKey); err != nil {
+		log.Fatalln(err)
+	}
+
 	// decrypt the common prime on the client side from the encrypted text
 	// provided
-	err = alice.AddCommonPrime(bob.CommonPrimeEncrypted)
+	err = alice.AddCommonPrime(encPrime)
 	if err != nil {
 		log.Println(err)
 	}

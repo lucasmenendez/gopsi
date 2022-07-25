@@ -10,15 +10,20 @@ import (
 	"github.com/lucasmenendez/psi/pkg/sra"
 )
 
+// Server struct contains all required parameters to allows to a client to
+// request a private set intersection. It generates a common prime number
+// (required by SRA protocol), allows to share it securely using RSA public key
+// from the client and perform the intersection.
 type Server struct {
-	CommonPrime          *big.Int
-	CommonPrimeEncrypted []byte
-	sraKey               *sra.SRAKey
-	Records              []*big.Int
-	filter               *bloomfilter.BloomFilter
+	CommonPrime *big.Int
+	sraKey      *sra.SRAKey
+	Records     []*big.Int
+	filter      *bloomfilter.BloomFilter
 }
 
-func Init(clientKey []byte) (server *Server, err error) {
+// Init function instances a Server generating a common prime number and
+// initializing the server SRA key with it.
+func Init() (server *Server, err error) {
 	server = &Server{}
 	if server.CommonPrime, err = rand.Prime(rand.Reader, 256); err != nil {
 		return
@@ -29,11 +34,19 @@ func Init(clientKey []byte) (server *Server, err error) {
 		return
 	}
 
-	var prime []byte = []byte(server.CommonPrime.Text(16))
-	server.CommonPrimeEncrypted, err = rsa.EncryptWitPublicKey(clientKey, prime)
 	return
 }
 
+// EncryptedPrime function encrypts the generated common prime with the RSA
+// public key provided by the client.
+func (server *Server) EncryptedPrime(clientKey []byte) ([]byte, error) {
+	var prime []byte = []byte(server.CommonPrime.Text(16))
+	return rsa.EncryptWitPublicKey(clientKey, prime)
+}
+
+// LoadData function receives the records to request the intersection. It
+// iterates over all items encondign each item to big.Int and encrypting it with
+// SRA. Then stores the encrypted records into the current client instance.
 func (server *Server) LoadData(data []string) error {
 	server.Records = make([]*big.Int, len(data))
 	for i, item := range data {
@@ -44,6 +57,12 @@ func (server *Server) LoadData(data []string) error {
 	return nil
 }
 
+// GetIntersection function allows to the server to get the common items
+// with the client records. It receives the server records re-encrypted by the
+// client and the encrypted client records. First, re-encrypt the client records
+// and then, compares with the its own records, re-encrypted by the client. It
+// returns the common records (only encrypted by the client to allow to it to
+// decrypt).
 func (server *Server) GetIntersection(encRecords, input []*big.Int) []*big.Int {
 	server.filter = bloomfilter.NewFilter(len(encRecords), 0.001)
 	for _, record := range encRecords {
