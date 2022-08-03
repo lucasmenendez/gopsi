@@ -1,59 +1,75 @@
 package encoder
 
 import (
+	"math"
 	"math/big"
 	"strconv"
 )
 
 // charSpaces constant represents the number of bytes required to encode
 // a single character.
-var charSpaces int = 3
+const charSpaces int = 3
 
-// Encode function process the provided string and return a concatenated bytes
-// numeric values into a single big.Int. It includes a starter mark with value
-// 1 to ensure that every character occupies the same space.
-func StrToInt(str string) (encoded *big.Int) {
-	// Calculate the padding value (p) to multiply the result in each iteration
-	// to get free space to store the next character, taking the reference of
-	// the number of spaces by character: padding = 10^charSpaces
-	var base10, exp *big.Int = big.NewInt(10), big.NewInt(int64(charSpaces))
-	var padding *big.Int = new(big.Int).Exp(base10, exp, nil)
+// maxWordValue constant contains the maximum value that a word can has. It
+// includes the default separator at first with value "1".
+const maxWordValue uint64 = 1999999999999999999
 
-	// Initializes encode with a start mark "1".
-	encoded = big.NewInt(1)
+// StrToInts function encodes the string provided into a slice of *big.Int's
+// iterating over input characters and storing each byte number representation.
+func StrToInts(input string) (encoded []*big.Int) {
+	// Calculate the padding with the charSpaces constant to multiply the
+	// current word value to get free space to the next character.
+	var padding = uint64(math.Pow10(charSpaces))
 
-	// Encode char by char.
-	slice := []byte(str)
-	for i := 0; i < len(slice); i++ {
-		// Multiply current value to create padding and make each char occupy
-		// the same position size to split it then.
-		encoded.Mul(encoded, padding)
-		// Get char number into a BigInt.
-		currentChar := big.NewInt(int64(slice[i]))
-		// Sum the char number to fill the padding.
-		encoded.Add(encoded, currentChar)
+	// Initialize the current word with a separator with value 1 and create a
+	// variable to count the length of the encoded current word, then iterate
+	// over input characters as bytes.
+	var currentWord uint64 = 1
+	// var currentWordLen int = 1
+	for _, c := range []byte(input) {
+		// Calculate the new word including the current character. Compare with
+		// the maximum value that a word can contain, if is greater or equal,
+		// append the current word and include the current character into a new
+		// one, else update the current word with the new word.
+		var newWord uint64 = (currentWord * padding) + uint64(c)
+		if newWord >= maxWordValue {
+			encoded = append(encoded, big.NewInt(int64(currentWord)))
+			currentWord = padding + uint64(c)
+		} else {
+			currentWord = newWord
+		}
 	}
+
+	// Include the last word encoded that contains one character at least.
+	encoded = append(encoded, big.NewInt(int64(currentWord)))
 	return
 }
 
-// Decode function process the provided big.Int value, splitting it into slice
-// of bytes value representations and casting it to string.
-func IntToStr(encoded *big.Int) (decoded string, err error) {
-	// Delete start mark of received value.
-	var str string = encoded.String()[1:]
-
+// IntsToStr function decode a provided slice of *big.Int's decoding each
+// character byte representation into a string.
+func IntsToStr(input []*big.Int) (decoded string, err error) {
 	// Create a byte array to store every byte char value.
 	var bytes []byte
-	for i := 0; i < len(str); i += charSpaces {
-		// Get the current string position content.
-		var value string = str[i : i+charSpaces]
-		// Cast the string value to integer.
-		var number int
-		if number, err = strconv.Atoi(value); err != nil {
-			return
+	for _, encoded := range input {
+		// Delete start mark of received value.
+		var str string = encoded.String()[1:]
+		var i int
+		for i < len(str) {
+			// Get the current string position content.
+			var value string = str[i : i+charSpaces]
+			// Cast the string value to integer.
+			var number int
+			if number, err = strconv.Atoi(value); err != nil {
+				return
+			}
+			// Append it as byte to the current byte array.
+			bytes = append(bytes, byte(number))
+
+			i += charSpaces
+			if i > len(str) {
+				i = len(str) - 1
+			}
 		}
-		// Append it as byte to the current byte array.
-		bytes = append(bytes, byte(number))
 	}
 	// Cast the byte array to string.
 	decoded = string(bytes)

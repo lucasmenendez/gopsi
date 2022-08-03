@@ -1,29 +1,18 @@
 package encoder
 
 import (
-	"math/big"
 	"testing"
 )
 
-func TestStrToInt(t *testing.T) {
-	input := "K_4.@m"
-	expected := big.NewInt(1075095052046064109)
-	result := StrToInt(input)
+func TestStrToIntsToStr(t *testing.T) {
+	var str = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nDonec molestie justo eget leo convallis ullamcorper.\nNam eros enim, dapibus euismod sodales eget, condimentum id enim.\nPraesent ornare feugiat ultrices.\nDonec tortor velit, ornare a interdum at, viverra et urna."
 
-	if expected.Cmp(result) != 0 {
-		t.Errorf("Expected '%s', got '%s'", expected.String(), result.String())
-		return
-	}
-}
+	resultInts := StrToInts(str)
 
-func TestIntToStr(t *testing.T) {
-	input := big.NewInt(1075095052046064109)
-	expected := "K_4.@m"
-	if result, err := IntToStr(input); err != nil {
+	if resultStr, err := IntsToStr(resultInts); err != nil {
 		t.Errorf("Error decoding input: %s", err)
-		return
-	} else if expected != result {
-		t.Errorf("Expected '%s', got '%s'", expected, result)
+	} else if str != resultStr {
+		t.Errorf("Expected '%s', got '%s'", resultInts, resultStr)
 		return
 	}
 }

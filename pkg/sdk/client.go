@@ -1,4 +1,4 @@
-package client
+package sdk
 
 import (
 	"errors"
@@ -12,16 +12,16 @@ import (
 // Client struct contains all required parameters to perform a private set
 // intersection over a knowed Server. It generates a RSA key pair to allow to
 // Server to share a common prime number securely, stores it, and allow to
-// encrypt the already encrypted Server records.
+// encrypt the already encrypted Server data.
 type Client struct {
 	CommonPrime *big.Int
 	sraKey      *sra.SRAKey
-	Records     []*big.Int
+	Data        [][]*big.Int
 	clientKeys  *rsa.RSAKey
 }
 
 // Init function instances a Client generating a new RSA key pair.
-func Init() (client *Client, err error) {
+func InitClient() (client *Client, err error) {
 	client = &Client{}
 
 	// Generate RSA keys pair
@@ -54,18 +54,25 @@ func (client *Client) AddCommonPrime(encryptedPrime []byte) (err error) {
 	return
 }
 
-// LoadData function receives the records to request the intersection. It
+// LoadData function receives the data to request the intersection. It
 // iterates over all items encondign each item to big.Int and encrypting it with
-// SRA. Then stores the encrypted records into the current client instance.
+// SRA. Then stores the encrypted data into the current client instance.
 func (client *Client) LoadData(data []string) error {
 	if client.sraKey == nil {
 		return errors.New("common prime not defined")
 	}
 
-	client.Records = make([]*big.Int, len(data))
+	client.Data = make([][]*big.Int, len(data))
 	for i, item := range data {
-		encoded := encoder.StrToInt(item)
-		client.Records[i] = client.sraKey.Encrypt(encoded)
+		var encrypted []*big.Int
+
+		var encoded []*big.Int = encoder.StrToInts(item)
+		for _, word := range encoded {
+			var encryptedWord *big.Int = client.sraKey.Encrypt(word)
+			encrypted = append(encrypted, encryptedWord)
+		}
+
+		client.Data[i] = encrypted
 	}
 
 	return nil
@@ -73,16 +80,48 @@ func (client *Client) LoadData(data []string) error {
 
 // EncryptInput functions allows to the client to re-encrypt the server data to
 // share it with its own encrypted data to the server, allowing to it to perform
-// the intersection.
-func (client *Client) EncryptInput(input []*big.Int) (output []*big.Int, err error) {
+// the intersection. It returns an error if the common prime is not defined.
+func (client *Client) EncryptExternal(input [][]*big.Int) (output [][]*big.Int, err error) {
 	if client.sraKey == nil {
 		return nil, errors.New("common prime not defined")
 	}
 
+	// Iterate over input items and its words encrypting it.
 	for _, item := range input {
-		encrypted := client.sraKey.Encrypt(item)
+		var encrypted []*big.Int
+		for _, word := range item {
+			var encryptedWord *big.Int = client.sraKey.Encrypt(word)
+			encrypted = append(encrypted, encryptedWord)
+		}
 		output = append(output, encrypted)
 	}
 
+	return
+}
+
+// Parse function decrypts and decodes the received intersection result from the
+// server. It returns an error if the common prime is not defined or if the
+// decoding process fails.
+func (client *Client) Parse(results [][]*big.Int) (output []string, err error) {
+	if client.sraKey == nil {
+		return nil, errors.New("common prime not defined")
+	}
+
+	// Iterate over intersection result items and its words decrypting and
+	// decoding it.
+	for _, item := range results {
+		var decrypted []*big.Int
+		for _, word := range item {
+			var decryptedWord *big.Int = client.sraKey.Decrypt(word)
+			decrypted = append(decrypted, decryptedWord)
+		}
+
+		var decoded string
+		if decoded, err = encoder.IntsToStr(decrypted); err != nil {
+			return
+		}
+
+		output = append(output, decoded)
+	}
 	return
 }
