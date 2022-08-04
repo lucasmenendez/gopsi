@@ -14,7 +14,7 @@ The following diagram explains the basic example of the library using [Client](/
  4. Receives Alice encrypted data to perform the intersection, re-encrypts it with his SRA key and compare with his 
  5. re-encrypted data using the Bloom Filter.
  
- This example is implemented into [psi_example/main.go](./main.go.go) file.
+ This example is implemented into [psi_example/main.go](./main.go) file.
 
 However you can use [SRA](/pkg/sra/sra.go) or [BloomFilters](/pkg/bloomfilter/bloomfilter.go) isolated and also design your own protocol using it.
 
