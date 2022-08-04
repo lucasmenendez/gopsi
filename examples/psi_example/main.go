@@ -5,12 +5,12 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/lucasmenendez/psi/pkg/sdk"
+	"github.com/lucasmenendez/psi/pkg/client"
 )
 
 var err error
-var alice *sdk.Client
-var bob *sdk.Server
+var alice *client.Client
+var bob *client.Client
 
 var aliceData = []string{
 	"at.iaculis@google.couk",
@@ -34,6 +34,9 @@ var bobData = []string{
 	"donec@outlook.net",
 }
 
+var encryptedAliceData [][]*big.Int
+var encryptedBobData [][]*big.Int
+
 // startIntances initializes the client (alice) and server (bob) instances and
 // perform a secure common prime number exchange using RSA (read more here:
 // https://github.com/lucasmenendez/gopsi/blob/dev/internal/rsa/rsa.go).
@@ -42,7 +45,7 @@ func startIntances() {
 	fmt.Println("------------------------")
 	// start client instance (alice) to generate public key and share it with
 	// the server (bob)
-	alice, err = sdk.InitClient()
+	alice, err = client.Init()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -55,25 +58,24 @@ func startIntances() {
 	// start server instance (bob) with the client public key to generate common
 	// prime, encrypt it with the key provided and share the result with the
 	// client
-	bob, err = sdk.InitServer()
+	bob, err = client.Init()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Printf("[server] common prime: %s\n", bob.CommonPrime.String())
-
 	var encPrime []byte
-	if encPrime, err = bob.EncryptedPrime(alicePubKey); err != nil {
+	if encPrime, err = bob.GenEncryptedPrime(alicePubKey); err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Printf("[bob] common prime: %s\n", bob.CommonPrime.String())
 
 	// decrypt the common prime on the client side from the encrypted text
 	// provided
-	err = alice.AddCommonPrime(encPrime)
+	err = alice.SetEncryptedPrime(encPrime)
 	if err != nil {
 		log.Println(err)
 	}
 
-	fmt.Printf("[client] common prime: %s\n", alice.CommonPrime.String())
+	fmt.Printf("[alice] common prime: %s\n", alice.CommonPrime.String())
 }
 
 // loadSilosData inject mocked data into client and server instances to get
@@ -85,19 +87,21 @@ func loadSilosData(aliceData, bobData []string) {
 
 	// create client (alice) data and load into the client intance to get it
 	// encrypted
-	err = alice.LoadData(aliceData)
+	encryptedAliceData, err = alice.Encrypt(aliceData)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("[alice] error encrypting data:", err)
 	}
-	fmt.Printf("[client] %d items loaded:\n", len(alice.Data))
+	fmt.Printf("[alice] %d items encrypted. Raw items:\n", len(encryptedAliceData))
 	for i, d := range aliceData {
 		fmt.Printf("\t%d. %v\n", i, d)
 	}
 
 	// create server (bob) data, encrypt and store it into the server intance
 	// and share it with the client
-	bob.LoadData(bobData)
-	fmt.Printf("[server] %d items loaded:\n", len(bob.Data))
+	if encryptedBobData, err = bob.Encrypt(bobData); err != nil {
+		log.Fatalln("[bob] error encrypting data:", err)
+	}
+	fmt.Printf("[bob] %d items encrypted. Raw items:\n", len(encryptedBobData))
 	for i, d := range bobData {
 		fmt.Printf("\t%d. %v\n", i, d)
 	}
@@ -115,31 +119,31 @@ func executeIntersection() {
 	fmt.Println("----------------------")
 	// re-encrypt the server encrypted data into the client and share the
 	// result and the encrypted client data with the server
-	var encryptedBobData [][]*big.Int
-	encryptedBobData, err = alice.EncryptExternal(bob.Data)
+	var encryptedBobDataByAlice [][]*big.Int
+	encryptedBobDataByAlice, err = alice.EncryptExt(encryptedBobData)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// initialize the intersection creating a filter with the re-encrypted
 	// server data received from the client
-	bob.InitIntersection(encryptedBobData)
+	bob.PrepareIntersection(encryptedBobDataByAlice)
 
 	// perform intersection re-encrypyting client data and comparing with
 	// the re-encrypted data of the server
-	intersection, err := bob.GetIntersection(alice.Data)
+	intersection, err := bob.GetIntersection(encryptedAliceData)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	// Parse received results from the server on the client.
 	var results []string
-	results, err = alice.Parse(intersection)
+	results, err = alice.ParseIntersection(intersection)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	fmt.Printf("[client] %d common items received:\n", len(intersection))
+	fmt.Printf("[alice] %d common items received:\n", len(intersection))
 	for _, d := range results {
 		var index int
 		for i, c := range aliceData {

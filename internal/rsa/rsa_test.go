@@ -54,7 +54,7 @@ func TestEncryptDecryptPk(t *testing.T) {
 	prime, _ := rand.Prime(rand.Reader, 256)
 	var input []byte = []byte(prime.Text(16))
 	var cipher, plain []byte
-	if cipher, err = EncryptWitPublicKey(pk, input); err != nil {
+	if cipher, err = EncryptWitPubKey(pk, input); err != nil {
 		t.Errorf("Expected success during input encryption, got error: %s", err)
 		return
 	}
@@ -94,7 +94,7 @@ func TestEncryptPk(t *testing.T) {
 		return
 	}
 
-	if cipher2, err = EncryptWitPublicKey(pk, input); err != nil {
+	if cipher2, err = EncryptWitPubKey(pk, input); err != nil {
 		t.Errorf("Expected success during input encryption 2, got error: %s", err)
 		return
 	}

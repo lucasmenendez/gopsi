@@ -46,7 +46,7 @@ func (key *RSAKey) PubKey() (pub []byte, err error) {
 	return
 }
 
-func EncryptWitPublicKey(pub, msg []byte) ([]byte, error) {
+func EncryptWitPubKey(pub, msg []byte) ([]byte, error) {
 	var ok bool
 	var key *RSAKey = &RSAKey{}
 	if candidate, err := x509.ParsePKIXPublicKey(pub); err != nil {
