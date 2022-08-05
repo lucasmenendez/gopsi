@@ -5,7 +5,7 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/lucasmenendez/psi/pkg/client"
+	"github.com/lucasmenendez/gopsi/pkg/client"
 )
 
 var err error

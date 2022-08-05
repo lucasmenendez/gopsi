@@ -5,10 +5,10 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/lucasmenendez/psi/internal/encoder"
-	"github.com/lucasmenendez/psi/internal/rsa"
-	"github.com/lucasmenendez/psi/pkg/bloomfilter"
-	"github.com/lucasmenendez/psi/pkg/sra"
+	"github.com/lucasmenendez/gopsi/internal/encoder"
+	"github.com/lucasmenendez/gopsi/internal/rsa"
+	"github.com/lucasmenendez/gopsi/pkg/bloomfilter"
+	"github.com/lucasmenendez/gopsi/pkg/sra"
 )
 
 // Client struct contains all required parameters to perform a private set

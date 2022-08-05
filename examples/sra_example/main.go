@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/lucasmenendez/psi/internal/encoder"
-	"github.com/lucasmenendez/psi/pkg/sra"
+	"github.com/lucasmenendez/gopsi/internal/encoder"
+	"github.com/lucasmenendez/gopsi/pkg/sra"
 )
 
 func main() {
