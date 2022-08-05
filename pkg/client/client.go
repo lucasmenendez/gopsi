@@ -207,7 +207,9 @@ func (client *Client) GetIntersection(input [][]*big.Int) ([][]*big.Int, error) 
 // defined or if the decoding process fails.
 func (client *Client) ParseIntersection(results [][]*big.Int) ([]string, error) {
 	var err error
-	if client.sraKey == nil {
+	if len(results) == 0 {
+		return nil, errors.New("empty results data")
+	} else if client.sraKey == nil {
 		err = errors.New("common prime not defined")
 		return nil, err
 	}

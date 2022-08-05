@@ -201,20 +201,52 @@ func TestGetIntersection(t *testing.T) {
 	}
 
 	encInputByA, _ := clientA.Encrypt(input)
+	encInputByB, _ := clientB.Encrypt(input)
+
 	encInputByAB, _ := clientB.EncryptExt(encInputByA)
 	clientA.PrepareIntersection(encInputByAB)
 
-	encInputByB, _ := clientB.Encrypt(input)
-	encInputByBA, _ := clientA.EncryptExt(encInputByB)
-
-	var result [][]*big.Int
-	if result, err = clientA.GetIntersection(encInputByBA); err != nil {
+	if result, err := clientA.GetIntersection(encInputByB); err != nil {
 		t.Fatalf("expected nil, got %s", err)
-	} else if reflect.DeepEqual(encInputByB, result) {
+	} else if !reflect.DeepEqual(encInputByB, result) {
 		t.Fatalf("expected %v, got %v", encInputByB, result)
 	}
 }
 
-func TestParse(t *testing.T) {
+func TestParseIntersection(t *testing.T) {
+	var err error
+	var input = []string{"hello world"}
 
+	clientA, _ := Init()
+	clientB, _ := Init()
+
+	var (
+		nilData       [][]*big.Int = nil
+		emptyData     [][]*big.Int = make([][]*big.Int, 0)
+		noInitialized [][]*big.Int = [][]*big.Int{{new(big.Int).SetInt64(0)}}
+	)
+	if _, err = clientB.ParseIntersection(nilData); err == nil {
+		t.Fatal("expected error got nil")
+	} else if _, err = clientB.ParseIntersection(emptyData); err == nil {
+		t.Fatal("expected error got nil")
+	} else if _, err = clientB.ParseIntersection(noInitialized); err == nil {
+		t.Fatal("expected error got nil")
+	}
+
+	pubKey, _ := clientB.PubKey()
+	encPrime, _ := clientA.GenEncryptedPrime(pubKey)
+	clientB.SetEncryptedPrime(encPrime)
+
+	encInputByA, _ := clientA.Encrypt(input)
+	encInputByB, _ := clientB.Encrypt(input)
+
+	encInputByAB, _ := clientB.EncryptExt(encInputByA)
+	clientA.PrepareIntersection(encInputByAB)
+
+	result, _ := clientA.GetIntersection(encInputByB)
+	if output, err := clientB.ParseIntersection(result); err != nil {
+		t.Fatalf("expected nil, got %s", err)
+	} else if !reflect.DeepEqual(input, output) {
+		t.Fatalf("expected %v, got %v", input, output)
+	}
 }
