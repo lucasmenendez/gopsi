@@ -1,6 +1,6 @@
 [![GoDoc](https://godoc.org/github.com/lucasmenendez/gopsi?status.svg)](https://godoc.org/github.com/lucasmenendez/gopsi)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lucasmenendez/gopsi)](https://goreportcard.com/report/github.com/lucasmenendez/gopsi)
-[![production](https://github.com/lucasmenendez/gopsi/workflows/production/badge.svg)](https://github.com/lucasmenendez/gopsi/actions?query=workflow%3Aproduction)
+[![test](https://github.com/lucasmenendez/gopsi/workflows/test/badge.svg)](https://github.com/lucasmenendez/gopsi/actions?query=workflow%3Atest)
 [![license](https://img.shields.io/github/license/lucasmenendez/gopsi)](LICENSE)
 
 # GoPSI - Private Set Intersection in Golang
