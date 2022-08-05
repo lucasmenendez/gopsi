@@ -1,3 +1,3 @@
-module github.com/lucasmenendez/psi
+module github.com/lucasmenendez/gopsi
 
-go 1.16
+go 1.18
