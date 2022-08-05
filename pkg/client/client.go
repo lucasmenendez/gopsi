@@ -42,12 +42,14 @@ func (client *Client) PubKey() ([]byte, error) {
 // GenEncryptedPrime function generates a common prime number to share with
 // other client and encrypts it with the RSA public key provided. It also try to
 // initialize the SRA key with the common prime generated.
-func (client *Client) GenEncryptedPrime(extKey []byte) ([]byte, error) {
-	var err error
-	if client.sraKey != nil && client.CommonPrime != nil {
+func (client *Client) GenEncryptedPrime(extPubKey []byte) ([]byte, error) {
+	if len(extPubKey) == 0 {
+		return nil, errors.New("empty external public key")
+	} else if client.sraKey != nil && client.CommonPrime != nil {
 		return nil, errors.New("common prime already defined, create a new instance")
 	}
 
+	var err error
 	var commonPrime *big.Int
 	if commonPrime, err = rand.Prime(rand.Reader, 256); err != nil {
 		return nil, err
@@ -55,7 +57,7 @@ func (client *Client) GenEncryptedPrime(extKey []byte) ([]byte, error) {
 
 	var encryptedPrime []byte
 	var cpBytes []byte = []byte(commonPrime.Text(16))
-	if encryptedPrime, err = rsa.EncryptWitPubKey(extKey, cpBytes); err != nil {
+	if encryptedPrime, err = rsa.EncryptWitPubKey(extPubKey, cpBytes); err != nil {
 		return nil, err
 	} else if client.sraKey, err = sra.NewKey(commonPrime, 32); err != nil {
 		return nil, err
@@ -70,7 +72,9 @@ func (client *Client) GenEncryptedPrime(extKey []byte) ([]byte, error) {
 // the current client instance to request the intersection. It also initializes
 // the client SRA key with the received and decrypted common prime.
 func (client *Client) SetEncryptedPrime(encryptedPrime []byte) (err error) {
-	if client.sraKey != nil && client.CommonPrime != nil {
+	if len(encryptedPrime) == 0 {
+		return errors.New("empty encrypted prime")
+	} else if client.sraKey != nil && client.CommonPrime != nil {
 		err = errors.New("common prime already defined, create a new instance")
 		return
 	}
@@ -95,7 +99,9 @@ func (client *Client) SetEncryptedPrime(encryptedPrime []byte) (err error) {
 // the SRA key. It iterates over all items enconding each item to big.Int and
 // encrypting it. Then returns the encrypted data.
 func (client *Client) Encrypt(data []string) (output [][]*big.Int, err error) {
-	if client.sraKey == nil {
+	if data == nil || len(data) <= 0 {
+		return nil, errors.New("empty data")
+	} else if client.sraKey == nil {
 		err = errors.New("common prime not defined")
 		return
 	}
@@ -119,7 +125,9 @@ func (client *Client) Encrypt(data []string) (output [][]*big.Int, err error) {
 // intersection using its re-encrypted data (the output) and, after re-encrypt
 // it, the current client encrypted data.
 func (client *Client) EncryptExt(input [][]*big.Int) (output [][]*big.Int, err error) {
-	if client.sraKey == nil {
+	if len(input) == 0 {
+		return nil, errors.New("empty input")
+	} else if client.sraKey == nil {
 		return nil, errors.New("common prime not defined")
 	}
 
@@ -139,7 +147,13 @@ func (client *Client) EncryptExt(input [][]*big.Int) (output [][]*big.Int, err e
 // PrepareIntersection function receives the current client re-encrypted data
 // (from another client) and creates a Bloom Filter with its content to be ready
 // to calculate the intersection.
-func (client *Client) PrepareIntersection(encryptedData [][]*big.Int) {
+func (client *Client) PrepareIntersection(encryptedData [][]*big.Int) error {
+	if len(encryptedData) == 0 {
+		return errors.New("empty encrypted data")
+	} else if client.filter != nil {
+		return errors.New("bloom filter already defined, create a new instance")
+	}
+
 	// Initialize the filter.
 	client.filter = bloomfilter.NewFilter(len(encryptedData), 0.0001)
 
@@ -153,6 +167,8 @@ func (client *Client) PrepareIntersection(encryptedData [][]*big.Int) {
 		}
 		client.filter.Add(record)
 	}
+
+	return nil
 }
 
 // GetIntersection function allows to the current client to get the common items
@@ -162,7 +178,11 @@ func (client *Client) PrepareIntersection(encryptedData [][]*big.Int) {
 // returns the common data (only encrypted by the client to allow to it to
 // decrypt).
 func (client *Client) GetIntersection(input [][]*big.Int) ([][]*big.Int, error) {
-	if client.filter == nil {
+	if len(input) == 0 {
+		return nil, errors.New("empty input data")
+	} else if client.sraKey == nil {
+		return nil, errors.New("common prime not defined")
+	} else if client.filter == nil {
 		return nil, errors.New("intersection not initialized")
 	}
 
