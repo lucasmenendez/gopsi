@@ -36,7 +36,7 @@ func NewFilter(size int, fp float64) (filter *BloomFilter) {
 	// the false positive rate provided.
 	filter.m = filter.numberOfBits(fp)
 	// Initialize the filter data bit map creating a slice of bool to store
-	// the calulate number of bits (m).
+	// the calculate number of bits (m).
 	filter.data = make([]bool, filter.m)
 
 	// Calculate the optimal number of hashes.
