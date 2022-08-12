@@ -7,7 +7,11 @@
 
 Simple Private Set Intersection implemented in pure Go. It uses SRA algorithm [[1]](#references) as encryption scheme and Bloom Filters [[2]](#references) to perform set intersection.
 
-## Docs & example
+## Examples and Docs
+Two full examples are already implemented:
+- Simple SRA encryption: [code](examples/sra_example/main.go)
+- PSI algorithm example: [docs](examples/psi_example/README.md) [code](examples/psi_example/main.go).
+
 Checkout [GoDoc Documentation](https://godoc.org/github.com/lucasmenendez/gopsi)
 
 

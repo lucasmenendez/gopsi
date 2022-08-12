@@ -223,10 +223,10 @@ func (client *Client) ParseIntersection(results [][]*big.Int) ([]string, error) 
 			decrypted[w] = client.sraKey.Decrypt(word)
 		}
 
-		var decoded string
-		if decoded, err = encoder.IntsToStr(decrypted); err != nil {
-			return nil, err
-		}
+		var decoded string = encoder.IntsToStr(decrypted)
+		// if decoded, err = encoder.IntsToStr(decrypted); err != nil {
+		// 	return nil, err
+		// }
 
 		output[i] = decoded
 	}
